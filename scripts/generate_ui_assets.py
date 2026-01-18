@@ -204,7 +204,7 @@ def _format_c_bytes(data: bytes, *, cols: int = 12) -> str:
 def _discover_assets(logos_dir: Path) -> list[Asset]:
     # Fixed mapping: symbol name -> search needle in filename
     mapping = {
-        "discord": "discord",
+        "libreoffice": "libreoffice",
         "firefox": "firefox",
         "prusa": "prusa",
         "prismlauncher": "prismlauncher",
@@ -228,7 +228,7 @@ def _discover_assets(logos_dir: Path) -> list[Asset]:
         )
 
     chosen = {
-        "discord": find_svg("discord"),
+        "libreoffice": find_svg("libreoffice"),
         "firefox": find_svg("firefox"),
         "prusa": find_svg("prusa"),
         "prismlauncher": find_svg("prismlauncher"),

@@ -1,6 +1,6 @@
-# ESP32‑S3 Touch LCD 4.3" (Waveshare) — Stream Deck + Contrôle PC
+# ESP32‑S3 Touch LCD 4.3" (Waveshare) — Stream Deck + Dashboard
 
-Langues: **Français** | **English** | **Español**
+Langues: **Français** | **English**
 
 ---
 
@@ -12,38 +12,67 @@ Ce dépôt contient un projet **PlatformIO (Arduino)** pour la carte **Waveshare
 
 Objectif: pouvoir décrire l'interface en **HTML/CSS/JS très simple**, puis la **traduire automatiquement en LVGL C** au moment du build.
 
-**Stream Deck inclus**: une interface avec **6 boutons tactiles** pour lancer des applications sur le PC:
-- Discord
+### Fonctionnalités
+
+**2 pages avec navigation par swipe horizontal:**
+
+#### Page 1 — Stream Deck (6 boutons)
+Lance des applications sur le PC:
+- LibreOffice
 - Firefox
 - Prusa Slicer
 - Prism Launcher
 - VS Code
 - Terminal
 
-Les boutons envoient des commandes série (`APP_DISCORD`, `APP_FIREFOX`, etc.) vers le PC. Un script Python écoute et lance les applications correspondantes.
+#### Page 2 — Dashboard
+Affiche en temps réel:
+- **Horloge** (police 48px)
+- **Date** complète
+- **Contrôle du volume** (Vol+, Mute, Vol-)
+- **Météo** (température, description, humidité, vent) via Open-Meteo API
+
+Les données sont envoyées depuis le PC via série.
 
 ### Structure
 
-- Interface "web": [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
-- Logos SVG: [data/logos/](data/logos/)
-- Convertisseur HTML→LVGL: [scripts/html_to_lvgl.py](scripts/html_to_lvgl.py)
-- Générateur d'assets (SVG→LVGL): [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py)
-- Généré automatiquement: [src/generated/](src/generated/)
-- Firmware principal: [src/main.cpp](src/main.cpp)
-- Lanceur d'apps côté PC: [pc_volume_control.py](pc_volume_control.py)
+```
+data/
+├── index.html          # Interface HTML (2 pages)
+├── style.css           # Styles CSS
+├── script.js           # Actions JS
+└── logos/              # Icônes SVG des apps
+
+scripts/
+├── html_to_lvgl.py     # Convertisseur HTML→LVGL
+└── generate_ui_assets.py  # Générateur SVG→LVGL
+
+src/
+├── main.cpp            # Firmware ESP32
+└── generated/          # Code LVGL auto-généré
+
+pc_volume_control.py    # Script PC (volume + météo + heure)
+start.sh                # Build complet
+```
 
 ### Prérequis
 
 - PlatformIO (VS Code) ou CLI `platformio`
-- Python 3 + `pyserial` (sur Arch: `sudo pacman -S python-pyserial`)
-- Pour les icônes: `rsvg-convert` (librsvg) ou ImageMagick (`magick`) ou Inkscape
-- Applications à lancer: Discord, Firefox, Prusa Slicer, Prism Launcher, VS Code, Terminal
+- Python 3 + `pyserial`, `requests`, `pulsectl`
+- Pour les icônes: `rsvg-convert` (librsvg) ou ImageMagick
+- Applications: LibreOffice, Firefox, Prusa Slicer, Prism Launcher, VS Code, Terminal
+
+### Installation
+
+```bash
+# Dépendances Python
+pip install pyserial requests pulsectl
+
+# Arch Linux
+sudo pacman -S python-pyserial python-requests python-pulsectl
+```
 
 ### Build & Flash
-
-1. Brancher la carte en USB
-2. Vérifier le port (`ls /dev/ttyACM*`)
-3. Lancer le build complet:
 
 ```bash
 ./start.sh
@@ -54,26 +83,32 @@ Ce script:
 2. Convertit HTML/CSS/JS en code LVGL C
 3. Compile et flashe le firmware
 
-### Lancer le lanceur d'apps PC
-
-1. Fermer le moniteur série PlatformIO (sinon le port peut être "busy")
-2. Lancer:
+### Lancer le contrôleur PC
 
 ```bash
 python3 pc_volume_control.py
 ```
 
-3. Appuyer sur les boutons sur l'écran tactile pour lancer les apps!
+Le script:
+- Écoute les commandes série (apps, volume)
+- Envoie l'heure toutes les secondes
+- Envoie la météo toutes les 5 minutes (Grenoble par défaut)
 
 ### Personnalisation
 
-Pour changer les applications:
-1. Modifier [data/index.html](data/index.html) (boutons)
-2. Modifier [data/style.css](data/style.css) (couleurs, positions)
-3. Modifier [data/script.js](data/script.js) (commandes envoyées)
-4. Ajouter les logos SVG dans [data/logos/](data/logos/)
-5. Mettre à jour [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py) (mapping des icônes)
-6. Mettre à jour [pc_volume_control.py](pc_volume_control.py) (commandes → exécutables)
+#### Changer les applications
+1. Modifier `data/index.html` (boutons)
+2. Modifier `data/style.css` (couleurs, positions)
+3. Modifier `data/script.js` (commandes)
+4. Ajouter les logos SVG dans `data/logos/`
+5. Mettre à jour `pc_volume_control.py`
+
+#### Changer la localisation météo
+Dans `pc_volume_control.py`, modifier les coordonnées:
+```python
+LATITUDE = 45.1885   # Grenoble
+LONGITUDE = 5.7245
+```
 
 ---
 
@@ -83,40 +118,69 @@ Pour changer les applications:
 
 This repository is a **PlatformIO (Arduino)** project for the **Waveshare ESP32‑S3 Touch LCD 4.3" (800×480)** using **LVGL v8.3.x**.
 
-Goal: describe a very simple UI using **HTML/CSS/JS**, then **auto‑convert it to LVGL C** at build time.
+Goal: describe a simple UI using **HTML/CSS/JS**, then **auto‑convert it to LVGL C** at build time.
 
-**Stream Deck included**: a 6-button touch interface to launch PC applications:
-- Discord
+### Features
+
+**2 pages with horizontal swipe navigation:**
+
+#### Page 1 — Stream Deck (6 buttons)
+Launch PC applications:
+- LibreOffice
 - Firefox
 - Prusa Slicer
 - Prism Launcher
 - VS Code
 - Terminal
 
-Buttons send serial commands (`APP_DISCORD`, `APP_FIREFOX`, etc.) to the PC. A Python script listens and launches the corresponding applications.
+#### Page 2 — Dashboard
+Real-time display:
+- **Clock** (48px font)
+- **Full date**
+- **Volume controls** (Vol+, Mute, Vol-)
+- **Weather** (temperature, description, humidity, wind) via Open-Meteo API
 
-### Key paths
+Data is sent from PC via serial.
 
-- "Web" UI: [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
-- SVG logos: [data/logos/](data/logos/)
-- HTML→LVGL converter: [scripts/html_to_lvgl.py](scripts/html_to_lvgl.py)
-- Asset generator (SVG→LVGL): [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py)
-- Generated output: [src/generated/](src/generated/)
-- Firmware entry: [src/main.cpp](src/main.cpp)
-- PC app launcher: [pc_volume_control.py](pc_volume_control.py)
+### Structure
+
+```
+data/
+├── index.html          # HTML UI (2 pages)
+├── style.css           # CSS styles
+├── script.js           # JS actions
+└── logos/              # SVG app icons
+
+scripts/
+├── html_to_lvgl.py     # HTML→LVGL converter
+└── generate_ui_assets.py  # SVG→LVGL generator
+
+src/
+├── main.cpp            # ESP32 firmware
+└── generated/          # Auto-generated LVGL code
+
+pc_volume_control.py    # PC script (volume + weather + time)
+start.sh                # Full build
+```
 
 ### Requirements
 
 - PlatformIO (VS Code) or `platformio` CLI
-- Python 3 + `pyserial` (Arch: `sudo pacman -S python-pyserial`)
-- For icons: `rsvg-convert` (librsvg) or ImageMagick (`magick`) or Inkscape
-- Apps to launch: Discord, Firefox, Prusa Slicer, Prism Launcher, VS Code, Terminal
+- Python 3 + `pyserial`, `requests`, `pulsectl`
+- For icons: `rsvg-convert` (librsvg) or ImageMagick
+- Apps: LibreOffice, Firefox, Prusa Slicer, Prism Launcher, VS Code, Terminal
 
-### Build & Upload
+### Installation
 
-1. Plug the board via USB
-2. Check the device path (`ls /dev/ttyACM*`)
-3. Run the full build:
+```bash
+# Python dependencies
+pip install pyserial requests pulsectl
+
+# Arch Linux
+sudo pacman -S python-pyserial python-requests python-pulsectl
+```
+
+### Build & Flash
 
 ```bash
 ./start.sh
@@ -127,64 +191,29 @@ This script:
 2. Converts HTML/CSS/JS to LVGL C code
 3. Compiles and uploads the firmware
 
-### Run PC app launcher
-
-1. Close PlatformIO serial monitor (otherwise the port may be busy)
-2. Run:
+### Run PC controller
 
 ```bash
 python3 pc_volume_control.py
 ```
 
-3. Tap buttons on the touch screen to launch apps!
+The script:
+- Listens for serial commands (apps, volume)
+- Sends time every second
+- Sends weather every 5 minutes (Grenoble by default)
 
----
+### Customization
 
-## Español
+#### Change applications
+1. Edit `data/index.html` (buttons)
+2. Edit `data/style.css` (colors, positions)
+3. Edit `data/script.js` (commands)
+4. Add SVG logos in `data/logos/`
+5. Update `pc_volume_control.py`
 
-### Descripción
-
-Este repositorio contiene un proyecto **PlatformIO (Arduino)** para la **Waveshare ESP32‑S3 Touch LCD 4.3" (800×480)** con **LVGL v8.3.x**.
-
-Objetivo: definir una interfaz simple con **HTML/CSS/JS** y **convertirla automáticamente a LVGL C** durante el build.
-
-**Stream Deck incluido**: interfaz táctil con **6 botones** para lanzar aplicaciones en el PC:
-- Discord
-- Firefox
-- Prusa Slicer
-- Prism Launcher
-- VS Code
-- Terminal
-
-Los botones envían comandos serie (`APP_DISCORD`, `APP_FIREFOX`, etc.) al PC. Un script Python escucha y lanza las aplicaciones correspondientes.
-
-### Rutas importantes
-
-- UI "web": [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
-- Logos SVG: [data/logos/](data/logos/)
-- Convertidor HTML→LVGL: [scripts/html_to_lvgl.py](scripts/html_to_lvgl.py)
-- Generador de assets: [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py)
-- Archivos generados: [src/generated/](src/generated/)
-- Firmware principal: [src/main.cpp](src/main.cpp)
-- Lanzador de apps (PC): [pc_volume_control.py](pc_volume_control.py)
-
-### Compilar y flashear
-
-1. Conecta la placa por USB
-2. Verifica el puerto (`ls /dev/ttyACM*`)
-3. Ejecuta el build completo:
-
-```bash
-./start.sh
+#### Change weather location
+In `pc_volume_control.py`, modify coordinates:
+```python
+LATITUDE = 45.1885   # Grenoble
+LONGITUDE = 5.7245
 ```
-
-### Ejecutar el lanzador en el PC
-
-1. Cierra el monitor serie de PlatformIO
-2. Ejecuta:
-
-```bash
-python3 pc_volume_control.py
-```
-
-3. ¡Pulsa los botones en la pantalla táctil para lanzar las apps!

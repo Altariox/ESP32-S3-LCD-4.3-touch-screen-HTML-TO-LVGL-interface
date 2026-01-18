@@ -244,6 +244,60 @@ void setup()
 
 void loop()
 {
-    // Serial.println("Loop");
-    sleep(1);
+    // Process serial input from PC (time, weather updates)
+    if (Serial.available()) {
+        String line = Serial.readStringUntil('\n');
+        line.trim();
+        
+        if (line.startsWith("TIME:")) {
+            String timeStr = line.substring(5);
+            lvgl_port_lock(-1);
+            if (ui_time_display) {
+                lv_label_set_text(ui_time_display, timeStr.c_str());
+            }
+            lvgl_port_unlock();
+        }
+        else if (line.startsWith("DATE:")) {
+            String dateStr = line.substring(5);
+            lvgl_port_lock(-1);
+            if (ui_date_display) {
+                lv_label_set_text(ui_date_display, dateStr.c_str());
+            }
+            lvgl_port_unlock();
+        }
+        else if (line.startsWith("TEMP:")) {
+            String tempStr = line.substring(5);
+            lvgl_port_lock(-1);
+            if (ui_temp_value) {
+                lv_label_set_text(ui_temp_value, tempStr.c_str());
+            }
+            lvgl_port_unlock();
+        }
+        else if (line.startsWith("WEATHER:")) {
+            String weatherStr = line.substring(8);
+            lvgl_port_lock(-1);
+            if (ui_weather_desc) {
+                lv_label_set_text(ui_weather_desc, weatherStr.c_str());
+            }
+            lvgl_port_unlock();
+        }
+        else if (line.startsWith("HUMIDITY:")) {
+            String humidStr = line.substring(9);
+            lvgl_port_lock(-1);
+            if (ui_humidity) {
+                lv_label_set_text(ui_humidity, humidStr.c_str());
+            }
+            lvgl_port_unlock();
+        }
+        else if (line.startsWith("WIND:")) {
+            String windStr = line.substring(5);
+            lvgl_port_lock(-1);
+            if (ui_wind) {
+                lv_label_set_text(ui_wind, windStr.c_str());
+            }
+            lvgl_port_unlock();
+        }
+    }
+    
+    delay(10);
 }

@@ -263,12 +263,20 @@ class HTMLToLVGL(HTMLParser):
         code.append('')
         
         # Déclarations des éléments
+        # Some labels need to be externally accessible for dynamic updates
+        dynamic_labels = ['time_display', 'date_display', 'temp_value', 'weather_desc', 'humidity', 'wind']
+        
         code.append('// UI Elements')
         for elem in self.elements:
             if elem['tag'] in ['screen', 'html', 'head', 'body', 'title', 'link', 'script', 'style']:
                 continue
             var_name = f"ui_{elem['id'].replace('-', '_')}"
-            code.append(f'static lv_obj_t* {var_name};')
+            elem_id_clean = elem['id'].replace('-', '_')
+            # Make dynamic labels non-static (externally accessible)
+            if elem_id_clean in dynamic_labels:
+                code.append(f'lv_obj_t* {var_name} = NULL;')
+            else:
+                code.append(f'static lv_obj_t* {var_name};')
         code.append('')
         
         # Variables JS (only simple numeric/string literals)
@@ -307,16 +315,44 @@ class HTMLToLVGL(HTMLParser):
             code.append('}')
             code.append('')
         
+        # Detect multiple screens for tileview
+        screens = [e for e in self.elements if e['tag'] == 'screen']
+        use_tileview = len(screens) > 1
+        
         # Fonction de création UI
         code.append('void ui_generated_init(lv_obj_t* parent) {')
-        code.append('    // Set screen background')
         
-        screen_style = self.css.get_style(None, None, 'screen')
-        if 'bg-color' in screen_style:
-            color = self.parse_color(screen_style['bg-color'])
-            code.append(f'    lv_obj_set_style_bg_color(parent, lv_color_hex({color}), 0);')
+        if use_tileview:
+            # Create tileview for multiple screens (swipeable pages)
+            code.append('    // Create tileview for swipeable pages')
+            code.append('    static lv_obj_t* tileview;')
+            code.append('    tileview = lv_tileview_create(parent);')
+            code.append('    lv_obj_set_size(tileview, 800, 480);')
+            code.append('    lv_obj_set_style_bg_opa(tileview, LV_OPA_TRANSP, 0);')
+            code.append('')
+            
+            # Create tiles for each screen
+            for idx, screen in enumerate(screens):
+                screen_id = screen['id'].replace('-', '_')
+                screen_style = self.css.get_style(screen['id'], None, 'screen')
+                bg_color = self.parse_color(screen_style.get('bg-color', '#1a1a2e'))
+                
+                code.append(f'    // Tile {idx}: {screen["id"]}')
+                code.append(f'    static lv_obj_t* tile_{screen_id};')
+                code.append(f'    tile_{screen_id} = lv_tileview_add_tile(tileview, {idx}, 0, LV_DIR_HOR);')
+                code.append(f'    lv_obj_set_style_bg_color(tile_{screen_id}, lv_color_hex({bg_color}), 0);')
+                code.append(f'    lv_obj_set_style_bg_opa(tile_{screen_id}, LV_OPA_COVER, 0);')
+                code.append('')
+        else:
+            code.append('    // Set screen background')
+            screen_style = self.css.get_style(None, None, 'screen')
+            if 'bg-color' in screen_style:
+                color = self.parse_color(screen_style['bg-color'])
+                code.append(f'    lv_obj_set_style_bg_color(parent, lv_color_hex({color}), 0);')
+            code.append('')
         
-        code.append('')
+        # Build screen ID list for parent resolution
+        screen_ids = [s['id'] for s in screens] if use_tileview else []
         
         # Créer les éléments
         for elem in self.elements:
@@ -325,8 +361,14 @@ class HTMLToLVGL(HTMLParser):
             
             var_name = f"ui_{elem['id'].replace('-', '_')}"
             parent_var = 'parent'
-            if elem['parent'] and elem['parent'] not in ['main', 'body']:
-                parent_var = f"ui_{elem['parent'].replace('-', '_')}"
+            
+            # Determine parent
+            if elem['parent']:
+                if use_tileview and elem['parent'] in screen_ids:
+                    # Parent is a screen -> use the tile
+                    parent_var = f"tile_{elem['parent'].replace('-', '_')}"
+                elif elem['parent'] not in ['main', 'body']:
+                    parent_var = f"ui_{elem['parent'].replace('-', '_')}"
             
             code.append(f'    // {elem["tag"]}#{elem["id"]}')
             
@@ -423,9 +465,17 @@ class HTMLToLVGL(HTMLParser):
         if 'font-size' in style:
             size = int(style['font-size'])
             # Map CSS font-size to an enabled LVGL font.
-            # Keep this conservative to avoid requiring many fonts.
-            if size >= 44:
+            # Fonts enabled: 14, 30, 36, 40, 44, 48
+            if size >= 100:
+                font = 'lv_font_montserrat_48'  # Largest available
+            elif size >= 60:
                 font = 'lv_font_montserrat_48'
+            elif size >= 44:
+                font = 'lv_font_montserrat_44'
+            elif size >= 40:
+                font = 'lv_font_montserrat_40'
+            elif size >= 36:
+                font = 'lv_font_montserrat_36'
             elif size >= 24:
                 font = 'lv_font_montserrat_30'
             else:
@@ -434,6 +484,19 @@ class HTMLToLVGL(HTMLParser):
             code.append(f'    lv_obj_set_style_text_font({var_name}, &{font}, 0);')
             if text_target_var:
                 code.append(f'    lv_obj_set_style_text_font({text_target_var}, &{font}, 0);')
+        
+        # Transform zoom support - scale(X) in CSS
+        if 'transform' in style:
+            transform = style['transform']
+            scale_match = re.search(r'scale\s*\(\s*([\d.]+)\s*\)', transform)
+            if scale_match:
+                scale = float(scale_match.group(1))
+                # LVGL zoom: 256 = 100%, so scale * 256
+                zoom_val = int(scale * 256)
+                code.append(f'    lv_obj_set_style_transform_zoom({var_name}, {zoom_val}, 0);')
+                # Need to set transform pivot to center for proper scaling
+                code.append(f'    lv_obj_set_style_transform_pivot_x({var_name}, LV_PCT(50), 0);')
+                code.append(f'    lv_obj_set_style_transform_pivot_y({var_name}, LV_PCT(50), 0);')
     
     def parse_color(self, color_str):
         """Convertit une couleur CSS en hex LVGL"""
@@ -477,7 +540,10 @@ def main():
     # Générer le code C
     c_code = html_parser.generate_c_code()
     
-    # Header file
+    # Header file with extern declarations for dynamic labels
+    # Identify labels that should be externally accessible
+    dynamic_labels = ['time_display', 'date_display', 'temp_value', 'weather_desc', 'humidity', 'wind']
+    
     header = '''// Auto-generated from HTML/CSS/JS
 // Do not edit manually!
 
@@ -493,6 +559,12 @@ extern "C" {
 // Extern function implemented in main.cpp for serial communication
 extern void serial_send(const char* message);
 
+// Dynamic labels accessible from main.cpp for updates
+'''
+    for label_id in dynamic_labels:
+        header += f'extern lv_obj_t* ui_{label_id};\n'
+    
+    header += '''
 void ui_generated_init(lv_obj_t* parent);
 
 #ifdef __cplusplus

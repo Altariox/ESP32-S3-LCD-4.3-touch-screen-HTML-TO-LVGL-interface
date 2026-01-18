@@ -1,6 +1,7 @@
-/* Stream Deck - 6 buttons only */
+/* Stream Deck - 2 pages with swipe */
 
-screen {
+/* ========== PAGE 1: APPS ========== */
+#page-apps {
     bg-color: #1a1a2e;
 }
 
@@ -19,12 +20,12 @@ screen {
 }
 
 /* Row 1 */
-#btn-discord {
+#btn-libreoffice {
     x: 20;
     y: 20;
     width: 240;
     height: 200;
-    bg-color: #5865F2;
+    bg-color: #18A303;
     border-radius: 24;
     padding: 0;
 }
@@ -65,7 +66,7 @@ screen {
     y: 240;
     width: 240;
     height: 200;
-    bg-color: rgb(36, 29, 29);
+    bg-color: #1E1E1E;
     border-radius: 24;
     padding: 0;
 }
@@ -78,4 +79,169 @@ screen {
     bg-color: #2C3E50;
     border-radius: 24;
     padding: 0;
+}
+
+/* ========== PAGE 2: DASHBOARD ========== */
+#page-info {
+    bg-color: #0d0d12;
+}
+
+.dashboard {
+    x: 0;
+    y: 0;
+    width: 800;
+    height: 480;
+    bg-color: #0d0d12;
+    padding: 0;
+}
+
+/* Volume panel - left side */
+.volume-panel {
+    x: 10;
+    y: 15;
+    width: 120;
+    height: 450;
+    bg-color: #1a1a22;
+    border-radius: 20;
+    padding: 0;
+}
+
+/* Volume + button - circular */
+#btn-vol-up {
+    x: 10;
+    y: 15;
+    width: 100;
+    height: 100;
+    bg-color: #252530;
+    border-radius: 50;
+    border-width: 0;
+    padding: 0;
+}
+
+#vol-up-icon {
+    x: center;
+    y: center;
+    text-color: #3498DB;
+    font-size: 56;
+}
+
+#vol-up-text {
+    x: center;
+    y: 125;
+    text-color: #666666;
+    font-size: 16;
+}
+
+/* Mute/Stop button */
+#btn-mute {
+    x: 10;
+    y: 165;
+    width: 100;
+    height: 100;
+    bg-color: #252530;
+    border-radius: 20;
+    border-width: 0;
+    padding: 0;
+}
+
+#mute-icon {
+    x: center;
+    y: center;
+    text-color: #E74C3C;
+    font-size: 42;
+}
+
+#mute-text {
+    x: center;
+    y: 275;
+    text-color: #666666;
+    font-size: 16;
+}
+
+/* Volume - button - circular */
+#btn-vol-down {
+    x: 10;
+    y: 315;
+    width: 100;
+    height: 100;
+    bg-color: #252530;
+    border-radius: 50;
+    border-width: 0;
+    padding: 0;
+}
+
+#vol-down-icon {
+    x: center;
+    y: center;
+    text-color: #3498DB;
+    font-size: 56;
+}
+
+#vol-down-text {
+    x: center;
+    y: 420;
+    text-color: #666666;
+    font-size: 16;
+}
+
+/* Clock - large font, no zoom for now */
+#time-display {
+    x: 400;
+    y: 150;
+    text-color: #FFFFFF;
+    font-size: 48;
+}
+
+/* Date - below clock */
+#date-display {
+    x: 250;
+    y: 240;
+    text-color: #4ECDC4;
+    font-size: 40;
+}
+
+/* Info bar - bottom with temperature */
+.info-bar {
+    x: 140;
+    y: 380;
+    width: 650;
+    height: 90;
+    bg-color: #1a1a22;
+    border-radius: 20;
+    padding: 0;
+}
+
+#temp-value {
+    x: 30;
+    y: center;
+    text-color: #E74C3C;
+    font-size: 48;
+}
+
+#temp-unit {
+    x: 100;
+    y: 15;
+    text-color: #E74C3C;
+    font-size: 28;
+}
+
+#weather-desc {
+    x: 160;
+    y: center;
+    text-color: #AAAAAA;
+    font-size: 28;
+}
+
+#humidity {
+    x: 380;
+    y: center;
+    text-color: #3498DB;
+    font-size: 28;
+}
+
+#wind {
+    x: 510;
+    y: center;
+    text-color: #AAAAAA;
+    font-size: 28;
 }

@@ -5,14 +5,47 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <screen id="main">
+    <!-- Page 1: Applications -->
+    <screen id="page-apps">
         <div class="container">
-            <button id="btn-discord" onclick="openDiscord()"><img class="icon" data-icon="discord"></button>
+            <button id="btn-libreoffice" onclick="openLibreOffice()"><img class="icon" data-icon="libreoffice"></button>
             <button id="btn-firefox" onclick="openFirefox()"><img class="icon" data-icon="firefox"></button>
             <button id="btn-prusa" onclick="openPrusaSlicer()"><img class="icon" data-icon="prusa"></button>
             <button id="btn-prism" onclick="openPrismLauncher()"><img class="icon" data-icon="prismlauncher"></button>
             <button id="btn-vscode" onclick="openVSCode()"><img class="icon" data-icon="vscode"></button>
             <button id="btn-terminal" onclick="openTerminal()"><img class="icon" data-icon="terminal"></button>
+        </div>
+    </screen>
+    
+    <!-- Page 2: Dashboard - clean without emojis -->
+    <screen id="page-info">
+        <div class="dashboard">
+            <!-- Volume controls on left -->
+            <div class="volume-panel">
+                <button id="btn-vol-up" onclick="volUp()"><label id="vol-up-icon">+</label></button>
+                <label id="vol-up-text">Vol+</label>
+                
+                <button id="btn-mute" onclick="toggleMute()"><label id="mute-icon">M</label></button>
+                <label id="mute-text">Mute</label>
+                
+                <button id="btn-vol-down" onclick="volDown()"><label id="vol-down-icon">-</label></button>
+                <label id="vol-down-text">Vol-</label>
+            </div>
+            
+            <!-- Clock center - HUGE -->
+            <label id="time-display">10:45</label>
+            
+            <!-- Date below clock -->
+            <label id="date-display">Samedi 18 Janvier 2026</label>
+            
+            <!-- Info bar at bottom with temp -->
+            <div class="info-bar">
+                <label id="temp-value">21</label>
+                <label id="temp-unit">C</label>
+                <label id="weather-desc">Nuageux</label>
+                <label id="humidity">55%</label>
+                <label id="wind">15 km/h</label>
+            </div>
         </div>
     </screen>
     

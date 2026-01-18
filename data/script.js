@@ -1,7 +1,8 @@
-// Stream Deck - sends serial commands to PC
+// Stream Deck - Page 1: Apps, Page 2: Info + Volume
 
-function openDiscord() {
-    serialSend("APP_DISCORD");
+// ========== PAGE 1: APP LAUNCHERS ==========
+function openLibreOffice() {
+    serialSend("APP_LIBREOFFICE");
 }
 
 function openFirefox() {
@@ -22,6 +23,19 @@ function openVSCode() {
 
 function openTerminal() {
     serialSend("APP_TERMINAL");
+}
+
+// ========== PAGE 2: VOLUME CONTROLS ==========
+function volUp() {
+    serialSend("VOL_UP");
+}
+
+function volDown() {
+    serialSend("VOL_DOWN");
+}
+
+function toggleMute() {
+    serialSend("VOL_MUTE");
 }
 
 function init() {
