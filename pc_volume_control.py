@@ -83,7 +83,7 @@ def launch_app(command: str) -> None:
     """Launch an application based on a serial command."""
     mapping: dict[str, list[list[str]]] = {
         "APP_DISCORD": [["discord"], ["discord-canary"], ["discord-ptb"]],
-        "APP_BRAVE": [["brave-browser"], ["brave"]],
+        "APP_FIREFOX": [["firefox"], ["firefox-esr"]],
         "APP_PRUSA_SLICER": [["prusa-slicer"], ["PrusaSlicer"]],
         "APP_PRISM_LAUNCHER": [["prismlauncher"], ["PrismLauncher"]],
         "APP_VSCODE": [["code"], ["codium"], ["vscodium"]],

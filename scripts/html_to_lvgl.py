@@ -187,6 +187,9 @@ class JSParser:
 
 
 class HTMLToLVGL(HTMLParser):
+    # Tags that are self-closing or void elements
+    VOID_TAGS = {'img', 'input', 'br', 'hr', 'meta', 'link', 'area', 'base', 'col', 'embed', 'param', 'source', 'track', 'wbr'}
+    
     def __init__(self, css_parser, js_parser):
         super().__init__()
         self.css = css_parser
@@ -203,6 +206,8 @@ class HTMLToLVGL(HTMLParser):
         onclick = attrs_dict.get('onclick', '')
         placeholder = attrs_dict.get('placeholder', '')
         input_type = attrs_dict.get('type', 'text')
+        src = attrs_dict.get('src', '')
+        data_icon = attrs_dict.get('data-icon', '')
         
         style = self.css.get_style(elem_id, elem_class, tag)
         
@@ -214,6 +219,8 @@ class HTMLToLVGL(HTMLParser):
             'onclick': onclick.replace('()', '') if onclick else '',
             'placeholder': placeholder,
             'type': input_type,
+            'src': src,
+            'data_icon': data_icon,
             'text': '',
             'parent': self.current_parent,
             'children': []
@@ -226,9 +233,13 @@ class HTMLToLVGL(HTMLParser):
                     break
         
         self.elements.append(element)
-        self.parent_stack.append(self.current_parent)
-        self.current_parent = elem_id
         self.element_id += 1
+        
+        # For void/self-closing tags, don't push to parent stack
+        # They can't have children, so don't change current_parent
+        if tag.lower() not in self.VOID_TAGS:
+            self.parent_stack.append(self.current_parent)
+            self.current_parent = elem_id
     
     def handle_endtag(self, tag):
         if self.parent_stack:
@@ -246,6 +257,7 @@ class HTMLToLVGL(HTMLParser):
         code.append('// Do not edit manually!')
         code.append('')
         code.append('#include "ui_generated.h"')
+        code.append('#include "ui_assets.h"')
         code.append('#include <stdio.h>')
         code.append('#include <string.h>')
         code.append('')
@@ -344,6 +356,14 @@ class HTMLToLVGL(HTMLParser):
             elif elem['tag'] == 'div':
                 code.append(f'    {var_name} = lv_obj_create({parent_var});')
                 code.append(f'    lv_obj_clear_flag({var_name}, LV_OBJ_FLAG_SCROLLABLE);')
+
+            elif elem['tag'] == 'img':
+                code.append(f'    {var_name} = lv_img_create({parent_var});')
+                if elem.get('data_icon'):
+                    icon_sym = re.sub(r'[^a-zA-Z0-9_]', '_', elem['data_icon']).lower()
+                    code.append(f'    lv_img_set_src({var_name}, &ui_img_{icon_sym});')
+                else:
+                    code.append(f'    // WARNING: img#{elem["id"]} is missing data-icon; no source set')
             
             # Appliquer les styles
             style = elem['style']

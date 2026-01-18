@@ -17,10 +17,13 @@ need_cmd() {
 need_cmd python3
 need_cmd platformio
 
-echo "==> [1/2] Generating LVGL UI from data/ (HTML/CSS/JS)"
+echo "==> [1/3] Generating LVGL image assets from data/logos (SVG)"
+python3 scripts/generate_ui_assets.py
+
+echo "==> [2/3] Generating LVGL UI from data/ (HTML/CSS/JS)"
 python3 scripts/html_to_lvgl.py
 
-echo "==> [2/2] Uploading firmware via PlatformIO"
+echo "==> [3/3] Uploading firmware via PlatformIO"
 cmd=(platformio run -e "$ENV_NAME" --target upload)
 if [[ -n "$UPLOAD_PORT" ]]; then
   cmd+=(--upload-port "$UPLOAD_PORT")

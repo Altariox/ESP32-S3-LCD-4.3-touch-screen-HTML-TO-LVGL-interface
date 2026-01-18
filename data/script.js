@@ -4,8 +4,8 @@ function openDiscord() {
     serialSend("APP_DISCORD");
 }
 
-function openBrave() {
-    serialSend("APP_BRAVE");
+function openFirefox() {
+    serialSend("APP_FIREFOX");
 }
 
 function openPrusaSlicer() {

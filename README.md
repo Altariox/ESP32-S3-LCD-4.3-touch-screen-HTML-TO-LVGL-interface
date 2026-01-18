@@ -1,4 +1,4 @@
-# ESP32‑S3 Touch LCD 4.3" (Waveshare) — UI “Web” → LVGL + Contrôle de volume PC
+# ESP32‑S3 Touch LCD 4.3" (Waveshare) — Stream Deck + Contrôle PC
 
 Langues: **Français** | **English** | **Español**
 
@@ -10,59 +10,70 @@ Langues: **Français** | **English** | **Español**
 
 Ce dépôt contient un projet **PlatformIO (Arduino)** pour la carte **Waveshare ESP32‑S3 Touch LCD 4.3" (800×480)** avec **LVGL v8.3.x**.
 
-Objectif: pouvoir décrire l’interface en **HTML/CSS/JS très simple**, puis la **traduire automatiquement en LVGL C** au moment du build.
+Objectif: pouvoir décrire l'interface en **HTML/CSS/JS très simple**, puis la **traduire automatiquement en LVGL C** au moment du build.
 
-Démo incluse: une interface minimaliste avec deux boutons **“+”** et **“-”** sur l’écran tactile qui envoient des commandes série (`VOL_UP` / `VOL_DOWN`) vers le PC.
+**Stream Deck inclus**: une interface avec **6 boutons tactiles** pour lancer des applications sur le PC:
+- Discord
+- Firefox
+- Prusa Slicer
+- Prism Launcher
+- VS Code
+- Terminal
 
-Sur le PC, un script Python écoute le port série et ajuste le volume (Linux / PipeWire / PulseAudio via `pactl`). Le volume est **borné entre 0% et 100%**.
+Les boutons envoient des commandes série (`APP_DISCORD`, `APP_FIREFOX`, etc.) vers le PC. Un script Python écoute et lance les applications correspondantes.
 
 ### Structure
 
-- Interface “web”: [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
+- Interface "web": [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
+- Logos SVG: [data/logos/](data/logos/)
 - Convertisseur HTML→LVGL: [scripts/html_to_lvgl.py](scripts/html_to_lvgl.py)
-- Généré automatiquement: [src/generated/ui_generated.c](src/generated/ui_generated.c) et [src/generated/ui_generated.h](src/generated/ui_generated.h)
+- Générateur d'assets (SVG→LVGL): [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py)
+- Généré automatiquement: [src/generated/](src/generated/)
 - Firmware principal: [src/main.cpp](src/main.cpp)
-- Contrôle volume côté PC: [pc_volume_control.py](pc_volume_control.py)
+- Lanceur d'apps côté PC: [pc_volume_control.py](pc_volume_control.py)
 
 ### Prérequis
 
 - PlatformIO (VS Code) ou CLI `platformio`
-- Linux: `pactl` (PipeWire/PulseAudio). Optionnel: `amixer` en fallback
 - Python 3 + `pyserial` (sur Arch: `sudo pacman -S python-pyserial`)
+- Pour les icônes: `rsvg-convert` (librsvg) ou ImageMagick (`magick`) ou Inkscape
+- Applications à lancer: Discord, Firefox, Prusa Slicer, Prism Launcher, VS Code, Terminal
 
 ### Build & Flash
 
 1. Brancher la carte en USB
-2. Vérifier le port (`ls /dev/ttyACM*`) et mettre à jour `upload_port` / `monitor_port` dans [platformio.ini](platformio.ini)
-3. Compiler + flasher:
+2. Vérifier le port (`ls /dev/ttyACM*`)
+3. Lancer le build complet:
 
-	- `platformio run --target upload`
+```bash
+./start.sh
+```
 
-Le script [scripts/pre_build.py](scripts/pre_build.py) lance automatiquement la conversion HTML→LVGL avant compilation.
+Ce script:
+1. Génère les assets LVGL depuis les SVG
+2. Convertit HTML/CSS/JS en code LVGL C
+3. Compile et flashe le firmware
 
-Alternative (recommandé): utiliser [start.sh](start.sh) pour **générer l’UI** puis **uploader** en une seule commande:
+### Lancer le lanceur d'apps PC
 
-	- `./start.sh`
-
-Options:
-
-	- `PIO_ENV=esp32s3box ./start.sh`
-	- `PIO_PORT=/dev/ttyACM0 ./start.sh`
-
-### Lancer le contrôle volume PC
-
-1. Fermer le moniteur série PlatformIO (sinon le port peut être “busy”)
+1. Fermer le moniteur série PlatformIO (sinon le port peut être "busy")
 2. Lancer:
 
-	- `python3 pc_volume_control.py`
+```bash
+python3 pc_volume_control.py
+```
 
-3. Toucher **+** / **-** sur l’écran.
+3. Appuyer sur les boutons sur l'écran tactile pour lancer les apps!
 
-### Notes / Dépannage
+### Personnalisation
 
-- Si le port change (ex: `/dev/ttyACM0` ↔ `/dev/ttyACM1`), il faut mettre à jour [platformio.ini](platformio.ini) et/ou [pc_volume_control.py](pc_volume_control.py).
-- Les grosses polices LVGL sont activées dans [lib/lv_conf.h](lib/lv_conf.h) (Montserrat 48) pour que “+ / -” soient lisibles.
-- Ce dépôt embarque des bibliothèques tierces dans [lib/](lib/) avec leurs fichiers de licence respectifs.
+Pour changer les applications:
+1. Modifier [data/index.html](data/index.html) (boutons)
+2. Modifier [data/style.css](data/style.css) (couleurs, positions)
+3. Modifier [data/script.js](data/script.js) (commandes envoyées)
+4. Ajouter les logos SVG dans [data/logos/](data/logos/)
+5. Mettre à jour [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py) (mapping des icônes)
+6. Mettre à jour [pc_volume_control.py](pc_volume_control.py) (commandes → exécutables)
 
 ---
 
@@ -74,51 +85,58 @@ This repository is a **PlatformIO (Arduino)** project for the **Waveshare ESP32�
 
 Goal: describe a very simple UI using **HTML/CSS/JS**, then **auto‑convert it to LVGL C** at build time.
 
-Included demo: two big touch buttons **“+”** and **“-”** that send serial commands (`VOL_UP` / `VOL_DOWN`) to the host PC.
+**Stream Deck included**: a 6-button touch interface to launch PC applications:
+- Discord
+- Firefox
+- Prusa Slicer
+- Prism Launcher
+- VS Code
+- Terminal
 
-On the PC side, a Python script listens on the serial port and adjusts the system volume (Linux / PipeWire / PulseAudio via `pactl`). Volume is **clamped to 0–100%**.
+Buttons send serial commands (`APP_DISCORD`, `APP_FIREFOX`, etc.) to the PC. A Python script listens and launches the corresponding applications.
 
 ### Key paths
 
-- “Web” UI: [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
+- "Web" UI: [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
+- SVG logos: [data/logos/](data/logos/)
 - HTML→LVGL converter: [scripts/html_to_lvgl.py](scripts/html_to_lvgl.py)
-- Generated output: [src/generated/ui_generated.c](src/generated/ui_generated.c), [src/generated/ui_generated.h](src/generated/ui_generated.h)
+- Asset generator (SVG→LVGL): [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py)
+- Generated output: [src/generated/](src/generated/)
 - Firmware entry: [src/main.cpp](src/main.cpp)
-- PC volume controller: [pc_volume_control.py](pc_volume_control.py)
+- PC app launcher: [pc_volume_control.py](pc_volume_control.py)
 
 ### Requirements
 
 - PlatformIO (VS Code) or `platformio` CLI
-- Linux: `pactl` (PipeWire/PulseAudio). Optional fallback: `amixer`
 - Python 3 + `pyserial` (Arch: `sudo pacman -S python-pyserial`)
+- For icons: `rsvg-convert` (librsvg) or ImageMagick (`magick`) or Inkscape
+- Apps to launch: Discord, Firefox, Prusa Slicer, Prism Launcher, VS Code, Terminal
 
 ### Build & Upload
 
 1. Plug the board via USB
-2. Check the device path (`ls /dev/ttyACM*`) and update `upload_port` / `monitor_port` in [platformio.ini](platformio.ini)
-3. Upload:
+2. Check the device path (`ls /dev/ttyACM*`)
+3. Run the full build:
 
-	- `platformio run --target upload`
+```bash
+./start.sh
+```
 
-[scripts/pre_build.py](scripts/pre_build.py) runs the HTML→LVGL conversion before compilation.
+This script:
+1. Generates LVGL assets from SVGs
+2. Converts HTML/CSS/JS to LVGL C code
+3. Compiles and uploads the firmware
 
-Alternative (recommended): use [start.sh](start.sh) to **regenerate the UI** and **upload** in one shot:
-
-	- `./start.sh`
-
-Options:
-
-	- `PIO_ENV=esp32s3box ./start.sh`
-	- `PIO_PORT=/dev/ttyACM0 ./start.sh`
-
-### Run PC listener
+### Run PC app launcher
 
 1. Close PlatformIO serial monitor (otherwise the port may be busy)
 2. Run:
 
-	- `python3 pc_volume_control.py`
+```bash
+python3 pc_volume_control.py
+```
 
-3. Tap **+** / **-** on the display.
+3. Tap buttons on the touch screen to launch apps!
 
 ---
 
@@ -130,40 +148,43 @@ Este repositorio contiene un proyecto **PlatformIO (Arduino)** para la **Wavesha
 
 Objetivo: definir una interfaz simple con **HTML/CSS/JS** y **convertirla automáticamente a LVGL C** durante el build.
 
-Demo incluida: dos botones táctiles grandes **“+”** y **“-”** que envían comandos por serie (`VOL_UP` / `VOL_DOWN`) al PC.
+**Stream Deck incluido**: interfaz táctil con **6 botones** para lanzar aplicaciones en el PC:
+- Discord
+- Firefox
+- Prusa Slicer
+- Prism Launcher
+- VS Code
+- Terminal
 
-En el PC, un script Python escucha el puerto serie y ajusta el volumen (Linux / PipeWire / PulseAudio con `pactl`). El volumen queda **limitado a 0–100%**.
+Los botones envían comandos serie (`APP_DISCORD`, `APP_FIREFOX`, etc.) al PC. Un script Python escucha y lanza las aplicaciones correspondientes.
 
 ### Rutas importantes
 
-- UI “web”: [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
+- UI "web": [data/index.html](data/index.html), [data/style.css](data/style.css), [data/script.js](data/script.js)
+- Logos SVG: [data/logos/](data/logos/)
 - Convertidor HTML→LVGL: [scripts/html_to_lvgl.py](scripts/html_to_lvgl.py)
-- Archivos generados: [src/generated/ui_generated.c](src/generated/ui_generated.c), [src/generated/ui_generated.h](src/generated/ui_generated.h)
+- Generador de assets: [scripts/generate_ui_assets.py](scripts/generate_ui_assets.py)
+- Archivos generados: [src/generated/](src/generated/)
 - Firmware principal: [src/main.cpp](src/main.cpp)
-- Control de volumen (PC): [pc_volume_control.py](pc_volume_control.py)
+- Lanzador de apps (PC): [pc_volume_control.py](pc_volume_control.py)
 
 ### Compilar y flashear
 
 1. Conecta la placa por USB
-2. Verifica el puerto (`ls /dev/ttyACM*`) y actualiza `upload_port` / `monitor_port` en [platformio.ini](platformio.ini)
-3. Subir firmware:
+2. Verifica el puerto (`ls /dev/ttyACM*`)
+3. Ejecuta el build completo:
 
-	- `platformio run --target upload`
+```bash
+./start.sh
+```
 
-Alternativa (recomendado): usa [start.sh](start.sh) para **regenerar la UI** y **subir** el firmware en un solo comando:
+### Ejecutar el lanzador en el PC
 
-	- `./start.sh`
-
-Opciones:
-
-	- `PIO_ENV=esp32s3box ./start.sh`
-	- `PIO_PORT=/dev/ttyACM0 ./start.sh`
-
-### Ejecutar el script en el PC
-
-1. Cierra el monitor serie de PlatformIO (si no, el puerto puede estar ocupado)
+1. Cierra el monitor serie de PlatformIO
 2. Ejecuta:
 
-	- `python3 pc_volume_control.py`
+```bash
+python3 pc_volume_control.py
+```
 
-3. Pulsa **+** / **-** en la pantalla.
+3. ¡Pulsa los botones en la pantalla táctil para lanzar las apps!
