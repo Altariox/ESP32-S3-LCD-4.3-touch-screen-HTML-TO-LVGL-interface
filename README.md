@@ -40,6 +40,15 @@ Sur le PC, un script Python écoute le port série et ajuste le volume (Linux / 
 
 Le script [scripts/pre_build.py](scripts/pre_build.py) lance automatiquement la conversion HTML→LVGL avant compilation.
 
+Alternative (recommandé): utiliser [start.sh](start.sh) pour **générer l’UI** puis **uploader** en une seule commande:
+
+	- `./start.sh`
+
+Options:
+
+	- `PIO_ENV=esp32s3box ./start.sh`
+	- `PIO_PORT=/dev/ttyACM0 ./start.sh`
+
 ### Lancer le contrôle volume PC
 
 1. Fermer le moniteur série PlatformIO (sinon le port peut être “busy”)
@@ -93,6 +102,15 @@ On the PC side, a Python script listens on the serial port and adjusts the syste
 
 [scripts/pre_build.py](scripts/pre_build.py) runs the HTML→LVGL conversion before compilation.
 
+Alternative (recommended): use [start.sh](start.sh) to **regenerate the UI** and **upload** in one shot:
+
+	- `./start.sh`
+
+Options:
+
+	- `PIO_ENV=esp32s3box ./start.sh`
+	- `PIO_PORT=/dev/ttyACM0 ./start.sh`
+
 ### Run PC listener
 
 1. Close PlatformIO serial monitor (otherwise the port may be busy)
@@ -131,6 +149,15 @@ En el PC, un script Python escucha el puerto serie y ajusta el volumen (Linux / 
 3. Subir firmware:
 
 	- `platformio run --target upload`
+
+Alternativa (recomendado): usa [start.sh](start.sh) para **regenerar la UI** y **subir** el firmware en un solo comando:
+
+	- `./start.sh`
+
+Opciones:
+
+	- `PIO_ENV=esp32s3box ./start.sh`
+	- `PIO_PORT=/dev/ttyACM0 ./start.sh`
 
 ### Ejecutar el script en el PC
 

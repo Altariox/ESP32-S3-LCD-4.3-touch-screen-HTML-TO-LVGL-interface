@@ -83,7 +83,7 @@ void ui_generated_init(lv_obj_t* parent) {
     lv_obj_add_event_cb(ui_btn_plus, event_btn_plus, LV_EVENT_CLICKED, NULL);
     lv_obj_set_width(ui_btn_plus, 280);
     lv_obj_set_height(ui_btn_plus, 200);
-    lv_obj_align(ui_btn_plus, LV_ALIGN_LEFT_MID, 400, 0);
+    lv_obj_align(ui_btn_plus, LV_ALIGN_LEFT_MID, 340, 0);
     lv_obj_set_style_bg_color(ui_btn_plus, lv_color_hex(0x27AE60), 0);
     lv_obj_set_style_bg_opa(ui_btn_plus, LV_OPA_COVER, 0);
     lv_obj_set_style_text_color(ui_btn_plus, lv_color_hex(0xFFFFFF), 0);
