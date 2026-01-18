@@ -1,4 +1,4 @@
-/* Volume Control Style */
+/* Stream Deck Style */
 
 screen {
     bg-color: #0a0a0f;
@@ -8,43 +8,82 @@ screen {
     x: center;
     y: 40;
     text-color: #ffffff;
-    font-size: 40;
+    font-size: 36;
 }
 
 .container {
     x: center;
-    y: center;
-    width: 720;
-    height: 260;
+    y: 100;
+    width: 740;
+    height: 340;
     bg-color: #0a0a0f;
     padding: 20;
 }
 
-#btn-minus {
-    x: 40;
-    y: center;
-    width: 280;
-    height: 200;
-    bg-color: #e74c3c;
+/* Button layout (2 columns x 3 rows) */
+
+#btn-discord {
+    x: 20;
+    y: 20;
+    width: 340;
+    height: 90;
+    bg-color: #5865F2;
     text-color: #ffffff;
-    font-size: 64;
-    border-radius: 32;
+    font-size: 32;
+    border-radius: 24;
 }
 
-#btn-plus {
-    x: 340;
-    y: center;
-    width: 280;
-    height: 200;
-    bg-color: #27ae60;
+#btn-brave {
+    x: 380;
+    y: 20;
+    width: 340;
+    height: 90;
+    bg-color: #FB542B;
     text-color: #ffffff;
-    font-size: 64;
-    border-radius: 32;
+    font-size: 32;
+    border-radius: 24;
 }
 
-.result {
-    x: center;
-    y: 270;
-    text-color: #00ff88;
-    font-size: 16;
+#btn-prusa {
+    x: 20;
+    y: 130;
+    width: 340;
+    height: 90;
+    bg-color: #FF7F2A;
+    text-color: #ffffff;
+    font-size: 28;
+    border-radius: 24;
+}
+
+#btn-prism {
+    x: 380;
+    y: 130;
+    width: 340;
+    height: 90;
+    bg-color: #2ECC71;
+    text-color: #ffffff;
+    font-size: 32;
+    border-radius: 24;
+}
+
+#btn-vscode {
+    x: 20;
+    y: 240;
+    width: 340;
+    height: 90;
+    bg-color: #007ACC;
+    text-color: #ffffff;
+    font-size: 32;
+    border-radius: 24;
+}
+
+#btn-terminal {
+    x: 380;
+    y: 240;
+    width: 340;
+    height: 90;
+    bg-color: #111827;
+    text-color: #ffffff;
+    font-size: 32;
+    border-radius: 24;
 }

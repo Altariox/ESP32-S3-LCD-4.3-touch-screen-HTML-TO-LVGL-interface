@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""
-ESP32 Volume Controller
-Listens to serial commands from ESP32 and adjusts PC volume
+"""pc_volume_control.py
+
+ESP32 serial command listener.
+
+- Volume control demo (VOL_UP / VOL_DOWN)
+- Stream-deck style app launcher (APP_*)
 """
 
 import serial
 import subprocess
 import sys
 import time
+import shutil
 
 # Configuration
 SERIAL_PORT = "/dev/ttyACM0"  # Adjust if needed
@@ -42,11 +46,12 @@ def set_volume(delta):
         new_volume = max(MIN_VOLUME, min(MAX_VOLUME, new_volume))
         
         if new_volume == current:
-            print(f"🔇 Volume already at {current}%")
+            print(f"Volume already at {current}%")
             return
         
         subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@", f"{new_volume}%"], check=True)
-        print(f"{'🔊' if delta > 0 else '🔉'} Volume: {current}% → {new_volume}%")
+        direction = "+" if delta > 0 else "-"
+        print(f"Volume {direction}: {current}% -> {new_volume}%")
     except FileNotFoundError:
         # Try amixer as fallback
         try:
@@ -57,9 +62,73 @@ def set_volume(delta):
         except Exception as e:
             print(f"Error adjusting volume: {e}")
 
+
+def _launch_first_available(candidates: list[list[str]]) -> bool:
+    """Try a list of commands; launch first one available."""
+    for argv in candidates:
+        if not argv:
+            continue
+        exe = argv[0]
+        if shutil.which(exe) is None:
+            continue
+        try:
+            subprocess.Popen(argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            return True
+        except Exception:
+            continue
+    return False
+
+
+def launch_app(command: str) -> None:
+    """Launch an application based on a serial command."""
+    mapping: dict[str, list[list[str]]] = {
+        "APP_DISCORD": [["discord"], ["discord-canary"], ["discord-ptb"]],
+        "APP_BRAVE": [["brave-browser"], ["brave"]],
+        "APP_PRUSA_SLICER": [["prusa-slicer"], ["PrusaSlicer"]],
+        "APP_PRISM_LAUNCHER": [["prismlauncher"], ["PrismLauncher"]],
+        "APP_VSCODE": [["code"], ["codium"], ["vscodium"]],
+        "APP_TERMINAL": [
+            ["x-terminal-emulator"],
+            ["gnome-terminal"],
+            ["konsole"],
+            ["xfce4-terminal"],
+            ["kitty"],
+            ["alacritty"],
+            ["wezterm"],
+            ["tilix"],
+        ],
+    }
+
+    candidates = mapping.get(command)
+    if not candidates:
+        print(f"Unknown APP command: {command}")
+        return
+
+    ok = _launch_first_available(candidates)
+    if ok:
+        print(f"Launched: {command}")
+    else:
+        print(
+            f"Could not launch {command}. Install the app or edit the mapping in this script."
+        )
+
+
+def _is_probably_command(line: str) -> bool:
+    # Ignore touch debug lines like: "Touch point: x 123, y 456"
+    if not line:
+        return False
+    if line.startswith("Touch point"):
+        return False
+    # Only accept tokens we define (avoid spamming on random logs)
+    if " " in line:
+        return False
+    if len(line) > 64:
+        return False
+    return True
+
 def main():
     print("=" * 50)
-    print("ESP32 Volume Controller")
+    print("ESP32 Serial Controller (Volume + Stream Deck)")
     print("=" * 50)
     print(f"Connecting to {SERIAL_PORT}...")
     
@@ -72,13 +141,15 @@ def main():
         while True:
             if ser.in_waiting:
                 line = ser.readline().decode('utf-8', errors='ignore').strip()
-                if line:
+                if line and _is_probably_command(line):
                     print(f"Received: {line}")
-                    
+
                     if line == "VOL_UP":
                         set_volume(VOLUME_STEP)
                     elif line == "VOL_DOWN":
                         set_volume(-VOLUME_STEP)
+                    elif line.startswith("APP_"):
+                        launch_app(line)
                     else:
                         print(f"Unknown command: {line}")
             

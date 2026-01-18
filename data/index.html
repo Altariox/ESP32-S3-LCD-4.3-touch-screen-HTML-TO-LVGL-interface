@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Volume Control</title>
+    <title>Stream Deck</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <screen id="main">
-        <label id="title" class="title">Volume</label>
+        <label id="title" class="title">Stream Deck</label>
         
         <div class="container">
-            <button id="btn-minus" onclick="volumeDown()">-</button>
-            <button id="btn-plus" onclick="volumeUp()">+</button>
+            <button id="btn-discord" onclick="openDiscord()">Discord</button>
+            <button id="btn-brave" onclick="openBrave()">Brave</button>
+            <button id="btn-prusa" onclick="openPrusaSlicer()">PrusaSlicer</button>
+            <button id="btn-prism" onclick="openPrismLauncher()">Prism</button>
+            <button id="btn-vscode" onclick="openVSCode()">VS Code</button>
+            <button id="btn-terminal" onclick="openTerminal()">Terminal</button>
         </div>
     </screen>
     
