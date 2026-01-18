@@ -3,3 +3,17 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.python-version
+.venv/
+venv/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
