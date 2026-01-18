@@ -1,0 +1,50 @@
+/* Volume Control Style */
+
+screen {
+    bg-color: #0a0a0f;
+}
+
+.title {
+    x: center;
+    y: 40;
+    text-color: #ffffff;
+    font-size: 40;
+}
+
+.container {
+    x: center;
+    y: center;
+    width: 720;
+    height: 260;
+    bg-color: #0a0a0f;
+    padding: 20;
+}
+
+#btn-minus {
+    x: 40;
+    y: center;
+    width: 280;
+    height: 200;
+    bg-color: #e74c3c;
+    text-color: #ffffff;
+    font-size: 64;
+    border-radius: 32;
+}
+
+#btn-plus {
+    x: 400;
+    y: center;
+    width: 280;
+    height: 200;
+    bg-color: #27ae60;
+    text-color: #ffffff;
+    font-size: 64;
+    border-radius: 32;
+}
+
+.result {
+    x: center;
+    y: 270;
+    text-color: #00ff88;
+    font-size: 16;
+}
