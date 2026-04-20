@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import serial, subprocess, sys, time, shutil, threading, requests
+import os, serial, subprocess, sys, time, shutil, threading, requests
 from serial.tools import list_ports
 from datetime import datetime
 
-SERIAL_PORT = "/dev/ttyACM0"
 BAUD_RATE = 115200
 VOLUME_STEP = 5
 MAX_VOLUME, MIN_VOLUME = 100, 0
@@ -86,13 +85,47 @@ def fetch_weather():
     except:
         pass
 
-def _find_serial_port(preferred=SERIAL_PORT):
-    ports = [p.device for p in list_ports.comports()]
-    if preferred in ports:
-        return preferred
+def _find_serial_port(preferred=None):
+    ports = list(list_ports.comports())
+    if not ports:
+        return None
+
+    # Optional override from environment if you want to force a specific port.
+    env_port = os.getenv("ESP32_PORT")
+    if env_port:
+        for p in ports:
+            if p.device == env_port:
+                return p.device
+
+    if preferred:
+        for p in ports:
+            if p.device == preferred:
+                return p.device
+
+    def _score_port(p):
+        dev = (p.device or "").lower()
+        desc = (p.description or "").lower()
+        manu = (p.manufacturer or "").lower()
+        hwid = (p.hwid or "").lower()
+
+        score = 0
+        if "esp32" in desc or "espressif" in desc or "esp32" in manu or "espressif" in manu:
+            score += 100
+        if "usb" in dev or "usb" in desc:
+            score += 30
+        if dev.startswith("/dev/ttyacm") or dev.startswith("/dev/ttyusb"):
+            score += 20
+        if "vid:pid" in hwid:
+            score += 10
+        return score
+
+    best = max(ports, key=_score_port)
+    if _score_port(best) > 0:
+        return best.device
+
     for p in ports:
-        if p.startswith("/dev/ttyACM") or p.startswith("/dev/ttyUSB"):
-            return p
+        if p.device.startswith("/dev/tty"):
+            return p.device
     return None
 
 def _connect_serial_if_available():
