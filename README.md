@@ -93,6 +93,9 @@ Le script:
 - Écoute les commandes série (apps, volume)
 - Envoie l'heure toutes les secondes
 - Envoie la météo toutes les 5 minutes (Grenoble par défaut)
+- Démarre même si la carte n'est pas branchée
+- Tente automatiquement une reconnexion toutes les 2 secondes
+- Reprend immédiatement la communication si la carte est branchée pendant l'exécution
 
 ### Personnalisation
 
@@ -201,6 +204,9 @@ The script:
 - Listens for serial commands (apps, volume)
 - Sends time every second
 - Sends weather every 5 minutes (Grenoble by default)
+- Starts even if the board is not connected
+- Automatically retries serial connection every 2 seconds
+- Resumes communication immediately when the board is plugged in while running
 
 ### Customization
 
